@@ -10,6 +10,7 @@ class AppColors {
   static const dark = Color(0xFF0D0D0D);
   static const surface = Colors.white;
   static const textSecondary = Color(0xFF8A8A8A);
+  static const danger = Color(0xFFE5484D);
 }
 
 class AppTheme {

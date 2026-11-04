@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
+import 'transactions_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -15,7 +16,7 @@ class _HomeShellState extends State<HomeShell> {
 
   final List<Widget> _pages = const [
     DashboardScreen(),
-    _PlaceholderPage('Transaksi'),
+    TransactionsScreen(),
     _PlaceholderPage('Laporan'),
     _PlaceholderPage('Profil'),
   ];

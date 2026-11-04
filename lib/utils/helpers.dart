@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+const incomeCategories = ['Gaji', 'Pekerjaan', 'Lainnya'];
+
+const expenseCategories = [
+  'Makanan',
+  'Transportasi',
+  'Belanja',
+  'Tagihan',
+  'Hiburan',
+  'Lainnya',
+];
+
 String rupiah(num value) => NumberFormat.currency(
   locale: 'id_ID',
   symbol: 'Rp ',

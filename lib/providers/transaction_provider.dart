@@ -5,6 +5,50 @@ import '../models/transaction_model.dart';
 DateTime _daysAgo(int n) => DateTime.now().subtract(Duration(days: n));
 
 class TransactionProvider extends ChangeNotifier {
+  // ---- Filter ----
+  TransactionType? _filterType; // null = semua jenis
+  String? _filterCategory; // null = semua kategori
+
+  TransactionType? get filterType => _filterType;
+  String? get filterCategory => _filterCategory;
+
+  List<String> get categories =>
+      (_items.map((t) => t.category).toSet().toList()..sort());
+
+  List<TransactionModel> get filteredItems => items
+      .where(
+        (t) =>
+            (_filterType == null || t.type == _filterType) &&
+            (_filterCategory == null || t.category == _filterCategory),
+      )
+      .toList();
+
+  void setFilterType(TransactionType? type) {
+    _filterType = type;
+    notifyListeners();
+  }
+
+  void setFilterCategory(String? category) {
+    _filterCategory = category;
+    notifyListeners();
+  }
+
+  // ---- Tambah dan hapus ----
+  void addTransaction(TransactionModel t) {
+    _items.add(t);
+    notifyListeners();
+  }
+
+  void removeTransaction(String id) {
+    _items.removeWhere((t) => t.id == id);
+    // Jika kategori yang sedang difilter sudah kosong, filter dilepas
+    if (_filterCategory != null &&
+        !_items.any((t) => t.category == _filterCategory)) {
+      _filterCategory = null;
+    }
+    notifyListeners();
+  }
+
   final List<TransactionModel> _items = [
     TransactionModel(
       id: '1',
