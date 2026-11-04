@@ -1,8 +1,18 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../models/transaction_model.dart';
 
 DateTime _daysAgo(int n) => DateTime.now().subtract(Duration(days: n));
+
+enum ReportPeriod { week, month, year }
+
+class ReportBucket {
+  final String label;
+  final double income;
+  final double expense;
+  const ReportBucket(this.label, this.income, this.expense);
+}
 
 class TransactionProvider extends ChangeNotifier {
   // ---- Filter ----
@@ -47,6 +57,93 @@ class TransactionProvider extends ChangeNotifier {
       _filterCategory = null;
     }
     notifyListeners();
+  }
+
+  // ---- Laporan ----
+  ReportPeriod _period = ReportPeriod.week;
+  ReportPeriod get period => _period;
+
+  void setPeriod(ReportPeriod p) {
+    _period = p;
+    notifyListeners();
+  }
+
+  DateTime _dayOf(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  /// Tanggal awal periode yang sedang dipilih.
+  DateTime get _periodStart {
+    final now = DateTime.now();
+    final today = _dayOf(now);
+    return switch (_period) {
+      ReportPeriod.week => today.subtract(const Duration(days: 6)),
+      ReportPeriod.month => today.subtract(const Duration(days: 27)),
+      ReportPeriod.year => DateTime(now.year, now.month - 11, 1),
+    };
+  }
+
+  List<TransactionModel> get _periodItems {
+    final start = _periodStart;
+    return _items.where((t) => !_dayOf(t.date).isBefore(start)).toList();
+  }
+
+  double get periodIncome => _periodItems
+      .where((t) => t.isIncome)
+      .fold(0.0, (sum, t) => sum + t.amount);
+
+  double get periodExpense => _periodItems
+      .where((t) => !t.isIncome)
+      .fold(0.0, (sum, t) => sum + t.amount);
+
+  /// Data untuk grafik: 7 hari, 4 minggu, atau 12 bulan.
+  List<ReportBucket> get periodBuckets {
+    final start = _periodStart;
+    final count = switch (_period) {
+      ReportPeriod.week => 7,
+      ReportPeriod.month => 4,
+      ReportPeriod.year => 12,
+    };
+    final income = List<double>.filled(count, 0);
+    final expense = List<double>.filled(count, 0);
+
+    for (final t in _periodItems) {
+      final day = _dayOf(t.date);
+      final idx = switch (_period) {
+        ReportPeriod.week => day.difference(start).inDays,
+        ReportPeriod.month => day.difference(start).inDays ~/ 7,
+        ReportPeriod.year =>
+          (day.year - start.year) * 12 + day.month - start.month,
+      };
+      if (idx < 0 || idx >= count) continue;
+      if (t.isIncome) {
+        income[idx] += t.amount;
+      } else {
+        expense[idx] += t.amount;
+      }
+    }
+
+    return List.generate(count, (i) {
+      final label = switch (_period) {
+        ReportPeriod.week => DateFormat(
+          'E',
+          'id_ID',
+        ).format(start.add(Duration(days: i))),
+        ReportPeriod.month => 'Mgg ${i + 1}',
+        ReportPeriod.year => DateFormat(
+          'MMM',
+          'id_ID',
+        ).format(DateTime(start.year, start.month + i, 1)),
+      };
+      return ReportBucket(label, income[i], expense[i]);
+    });
+  }
+
+  /// Pengeluaran per kategori, dari yang terbesar.
+  List<MapEntry<String, double>> get periodExpenseByCategory {
+    final totals = <String, double>{};
+    for (final t in _periodItems.where((t) => !t.isIncome)) {
+      totals[t.category] = (totals[t.category] ?? 0) + t.amount;
+    }
+    return totals.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
   }
 
   final List<TransactionModel> _items = [
