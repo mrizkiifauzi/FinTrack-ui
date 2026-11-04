@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'transactions_screen.dart';
+import 'add_transaction_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -27,7 +28,9 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(index: _index, children: _pages),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Dihubungkan ke halaman Tambah Transaksi di langkah berikutnya
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+          );
         },
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
