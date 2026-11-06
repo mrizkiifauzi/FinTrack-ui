@@ -7,6 +7,7 @@ import '../providers/transaction_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/helpers.dart';
 import '../widgets/transaction_tile.dart';
+import '../providers/profile_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -15,6 +16,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = context.watch<TransactionProvider>();
     final text = Theme.of(context).textTheme;
+    final profile = context.watch<ProfileProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +36,7 @@ class DashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Halo, Pengguna',
+                  'Halo, ${profile.name}',
                   style: text.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -66,7 +68,7 @@ class DashboardScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
         children: [
-          _BalanceCard(balance: data.balance),
+          _BalanceCard(balance: data.balance, hidden: profile.hideBalance),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -115,7 +117,8 @@ class DashboardScreen extends StatelessWidget {
 
 class _BalanceCard extends StatelessWidget {
   final double balance;
-  const _BalanceCard({required this.balance});
+  final bool hidden;
+  const _BalanceCard({required this.balance, required this.hidden});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +140,7 @@ class _BalanceCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              rupiah(balance),
+              hidden ? 'Rp ••••••' : rupiah(balance),
               style: text.headlineMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,

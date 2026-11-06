@@ -5,6 +5,7 @@ import 'dashboard_screen.dart';
 import 'transactions_screen.dart';
 import 'add_transaction_screen.dart';
 import 'report_screen.dart';
+import 'profile_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -20,7 +21,7 @@ class _HomeShellState extends State<HomeShell> {
     DashboardScreen(),
     TransactionsScreen(),
     ReportScreen(),
-    _PlaceholderPage('Profil'),
+    ProfileScreen(),
   ];
 
   @override
@@ -69,15 +70,5 @@ class _HomeShellState extends State<HomeShell> {
         ],
       ),
     );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  const _PlaceholderPage(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('$title (segera dibuat)'));
   }
 }
